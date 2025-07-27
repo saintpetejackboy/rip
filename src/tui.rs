@@ -5,38 +5,43 @@ use dialoguer::{Confirm, Input, MultiSelect};
 use std::path::PathBuf;
 
 pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
-    println!("{}", "[RIP-CONFIG] Interactive Setup".bright_cyan().bold());
-    println!("Let's configure RIP for your security scanning needs.\n");
+    // Display skull ASCII art
+    display_skull_art();
+    
+    println!("{}", "[RIP-CONFIG] Interactive Setup".bright_cyan().bold().on_black());
+    println!("{}", "💀 Let's configure RIP for your security scanning needs. 💀\n".bright_green().bold());
 
     // 1. Repository directory
     let repo_path: String = Input::new()
-        .with_prompt("Repository directory to scan")
+        .with_prompt(&format!("{} {}", "🎯".bright_yellow(), "Repository directory to scan".bright_cyan().bold()))
         .default(config.repository_path.to_string_lossy().to_string())
         .interact()?;
     config.repository_path = PathBuf::from(repo_path);
 
     // 2. Environment file name
     let env_file: String = Input::new()
-        .with_prompt("Environment file name")
+        .with_prompt(&format!("{} {}", "📄".bright_yellow(), "Environment file name".bright_cyan().bold()))
         .default(config.env_filename.clone())
         .interact()?;
     config.env_filename = env_file;
 
     // 3. Parse .env file and select keys
-    println!("\nParsing environment file...");
+    println!("\n{} {}", "🔍".bright_yellow(), "Parsing environment file...".bright_cyan());
     let available_keys = config.parse_env_file()?;
 
     if available_keys.is_empty() {
-        println!("No environment variables found or all values are trivial");
-        println!("Continuing with empty key list...");
+        println!("{} {}", "⚠️".bright_yellow(), "No environment variables found or all values are trivial".bright_red());
+        println!("{} {}", "➡️".bright_green(), "Continuing with empty key list...".bright_white());
     } else {
         println!(
-            "Found {} environment variables with non-trivial values:",
-            available_keys.len()
+            "{} {} {}",
+            "✅".bright_green(),
+            "Found".bright_cyan(),
+            format!("{} environment variables with non-trivial values:", available_keys.len()).bright_white().bold()
         );
 
         let selected_indices = MultiSelect::new()
-            .with_prompt("Select environment keys to scan for")
+            .with_prompt(&format!("{} {}", "🔑".bright_yellow(), "Select environment keys to scan for".bright_cyan().bold()))
             .items(&available_keys)
             .defaults(&vec![true; available_keys.len()]) // Select all by default
             .interact()?;
@@ -46,11 +51,11 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
             .map(|&i| available_keys[i].clone())
             .collect();
 
-        println!("Selected {} keys for scanning", config.env_keys.len());
+        println!("{} {} {}", "📊".bright_green(), "Selected".bright_cyan(), format!("{} keys for scanning", config.env_keys.len()).bright_white().bold());
     }
 
     // 4. File extensions
-    println!("\nConfiguring file extensions to scan...");
+    println!("\n{} {}", "📁".bright_yellow(), "Configuring file extensions to scan...".bright_cyan().bold());
     let extension_defaults = vec![
         true, true, true, true, // js, ts, jsx, tsx
         true, true, true, true, // py, rb, php, java
@@ -60,7 +65,7 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
     ];
 
     let selected_ext_indices = MultiSelect::new()
-        .with_prompt("Select file extensions to include in scan")
+        .with_prompt(&format!("{} {}", "🔧".bright_yellow(), "Select file extensions to include in scan".bright_cyan().bold()))
         .items(&config.file_extensions)
         .defaults(&extension_defaults)
         .interact()?;
@@ -71,11 +76,11 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
         .collect();
 
     // 5. Ignore patterns
-    println!("\nConfiguring directories/patterns to ignore...");
+    println!("\n{} {}", "🚫".bright_yellow(), "Configuring directories/patterns to ignore...".bright_cyan().bold());
     let ignore_defaults = vec![true; config.ignore_patterns.len()]; // All ignored by default
 
     let selected_ignore_indices = MultiSelect::new()
-        .with_prompt("Select patterns to ignore during scan")
+        .with_prompt(&format!("{} {}", "⛔".bright_yellow(), "Select patterns to ignore during scan".bright_cyan().bold()))
         .items(&config.ignore_patterns)
         .defaults(&ignore_defaults)
         .interact()?;
@@ -86,15 +91,15 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
         .collect();
 
     // 6. Web scanning configuration
-    println!("\nWeb scanning configuration...");
+    println!("\n{} {}", "🌐".bright_yellow(), "Web scanning configuration...".bright_cyan().bold());
     config.enable_web_scan = Confirm::new()
-        .with_prompt("Enable web vulnerability scanning?")
+        .with_prompt(&format!("{} {}", "🔗".bright_yellow(), "Enable web vulnerability scanning?".bright_cyan().bold()))
         .default(false)
         .interact()?;
 
     if config.enable_web_scan {
         let web_url: String = Input::new()
-            .with_prompt("Public URL for web scanning")
+            .with_prompt(&format!("{} {}", "🌍".bright_yellow(), "Public URL for web scanning".bright_cyan().bold()))
             .allow_empty(true)
             .interact()?;
 
@@ -104,39 +109,76 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
     }
 
     // 7. Save configuration
-    println!("\nConfiguration complete!");
+    println!("\n{} {}", "🎉".bright_green(), "Configuration complete!".bright_cyan().bold());
     print_config_summary(&config);
 
     let save_config = Confirm::new()
-        .with_prompt("Save this configuration to .ripconfig.toml?")
+        .with_prompt(&format!("{} {}", "💾".bright_yellow(), "Save this configuration to .ripconfig.toml?".bright_cyan().bold()))
         .default(true)
         .interact()?;
 
     if save_config {
         config.save_to_file(&Config::default_config_path())?;
-        println!("{}", "Configuration saved successfully!".green());
+        println!("{} {}", "✅".bright_green(), "Configuration saved successfully!".green().bold());
     }
+    
+    println!("{}", "═".repeat(60).bright_magenta());
 
     Ok(config)
 }
 
 fn print_config_summary(config: &Config) {
-    println!("\n{}", "Configuration Summary:".bright_yellow().bold());
-    println!("  Repository: {}", config.repository_path.display());
-    println!("  Environment file: {}", config.env_filename);
-    println!("  Selected keys: {} items", config.env_keys.len());
-    println!("  File extensions: {} types", config.file_extensions.len());
-    println!("  Ignore patterns: {} items", config.ignore_patterns.len());
+    println!("\n{}", "Configuration Summary:".bright_yellow().bold().on_black());
+    println!("  {} {}", "Repository:".bright_cyan(), config.repository_path.display().to_string().bright_white());
+    println!("  {} {}", "Environment file:".bright_cyan(), config.env_filename.bright_white());
+    println!("  {} {} items", "Selected keys:".bright_cyan(), config.env_keys.len().to_string().bright_white());
+    println!("  {} {} types", "File extensions:".bright_cyan(), config.file_extensions.len().to_string().bright_white());
+    println!("  {} {} items", "Ignore patterns:".bright_cyan(), config.ignore_patterns.len().to_string().bright_white());
     println!(
-        "  Web scanning: {}",
+        "  {} {}",
+        "Web scanning:".bright_cyan(),
         if config.enable_web_scan {
-            "enabled"
+            "enabled".bright_green()
         } else {
-            "disabled"
+            "disabled".bright_red()
         }
     );
 
     if let Some(url) = &config.web_url {
-        println!("  Web URL: {}", url);
+        println!("  {} {}", "Web URL:".bright_cyan(), url.bright_white());
     }
+}
+
+fn display_skull_art() {
+    use std::fs;
+    
+    // Try to load skull art from file
+    if let Ok(skull_art) = fs::read_to_string("art/rip-skull-logo.txt") {
+        println!("{}", skull_art);
+    } else {
+        // Fallback skull ASCII art with colors
+        println!("{}", r#"
+                            💀 RIP CONFIGURATION 💀
+        
+                    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+                    ⣿⣿⣿⣿⠟⠋⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠙⠻⣿⣿⣿⣿
+                    ⣿⣿⡿⠁                        ⠈⢿⣿⣿
+                    ⣿⡿⠁      👁️         👁️       ⠈⢿⣿
+                    ⣿⠃                              ⠘⣿
+                    ⣿               ▼                  ⣿
+                    ⣿                                ⣿
+                    ⣿             ┌─────┐              ⣿
+                    ⣿             │ ███ │              ⣿
+                    ⣿             └─────┘              ⣿
+                    ⠘⣿                              ⣿⠃
+                    ⠈⢿⣿                          ⣿⡿⠁
+                    ⠈⠻⣿⣿⣄                ⣀⣿⣿⠟⠁
+                    ⠈⠛⢿⣿⣿⣷⣶⣶⣶⣶⣶⣿⣿⡿⠛⠁
+                    ⠈⠛⠻⠿⣿⣿⣿⣿⠿⠟⠛⠁
+        
+            🔓 REST IN PEACE, VULNERABILITIES 🔓
+        "#.bright_red().bold());
+    }
+    
+    println!("{}", "═".repeat(60).bright_magenta());
 }

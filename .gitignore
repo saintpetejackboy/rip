@@ -34,10 +34,8 @@ coverage/
 
 # Project folders
 DONE/
-TODO/
 
-# Testing
-tests/
+# Specific test files (keep tests/ directory but ignore specific files)
 test.js
 *.test.js
 *.spec.js

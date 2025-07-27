@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
             } else if show {
                 println!("{}", toml::to_string_pretty(&config)?);
             } else {
-                config = tui::run_interactive_setup(config).await?;
+                tui::run_interactive_setup(config).await?;
             }
         }
         Commands::Version => {

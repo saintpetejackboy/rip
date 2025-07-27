@@ -381,11 +381,9 @@ mod tests {
         assert_eq!(files.len(), 2);
         assert!(files.iter().any(|f| f.file_name().unwrap() == "main.js"));
         assert!(files.iter().any(|f| f.file_name().unwrap() == "config.ts"));
-        assert!(
-            !files
-                .iter()
-                .any(|f| f.to_string_lossy().contains("node_modules"))
-        );
+        assert!(!files
+            .iter()
+            .any(|f| f.to_string_lossy().contains("node_modules")));
 
         Ok(())
     }

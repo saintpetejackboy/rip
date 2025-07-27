@@ -29,6 +29,14 @@ pub struct Cli {
     #[arg(short, long)]
     pub verbose: bool,
 
+    /// Enable quiet output (minimal messages)
+    #[arg(short, long)]
+    pub quiet: bool,
+
+    /// Output results in JSON format
+    #[arg(long)]
+    pub json: bool,
+
     /// Repository path to scan (default: current directory)
     #[arg(short, long, value_name = "PATH")]
     pub path: Option<PathBuf>,

@@ -311,16 +311,12 @@ mod tests {
         assert_eq!(vulnerabilities.len(), 4);
 
         // Should not contain the headers we added
-        assert!(
-            !vulnerabilities
-                .iter()
-                .any(|v| v.description.contains("x-frame-options"))
-        );
-        assert!(
-            !vulnerabilities
-                .iter()
-                .any(|v| v.description.contains("x-content-type-options"))
-        );
+        assert!(!vulnerabilities
+            .iter()
+            .any(|v| v.description.contains("x-frame-options")));
+        assert!(!vulnerabilities
+            .iter()
+            .any(|v| v.description.contains("x-content-type-options")));
     }
 
     #[test]
@@ -342,11 +338,9 @@ mod tests {
             .find(|v| v.vulnerability_type == "Insecure Header Configuration")
             .unwrap();
         assert!(matches!(insecure_xfo.severity, Severity::High));
-        assert!(
-            insecure_xfo
-                .description
-                .contains("X-Frame-Options set to ALLOWALL")
-        );
+        assert!(insecure_xfo
+            .description
+            .contains("X-Frame-Options set to ALLOWALL"));
     }
 
     #[test]

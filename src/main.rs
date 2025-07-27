@@ -5,7 +5,7 @@ mod tui;
 mod web_scanner;
 
 use anyhow::Result;
-use cli::{Commands, parse_args};
+use cli::{parse_args, Commands};
 use config::Config;
 use std::fs;
 

@@ -1,0 +1,26 @@
+{
+  "name": "rip",
+  "version": "0.1.0",
+  "description": "Rest In Peace, Vulnerabilities - A terminal-based security auditing tool",
+  "bin": {
+    "rip": "./rip.js"
+  },
+  "scripts": {
+    "postinstall": "node postinstall.js",
+    "test": "cargo test"
+  },
+  "keywords": [
+    "security",
+    "vulnerability",
+    "scanner",
+    "audit",
+    "secrets",
+    "rust"
+  ],
+  "author": "RIP Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rip-team/rip.git"
+  }
+}

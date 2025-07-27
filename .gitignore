@@ -1,0 +1,47 @@
+# --- Node / general ---
+node_modules/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.yarn/*
+.yarnrc.yml
+dist/
+build/
+coverage/
+.tmp/
+.cache/
+
+# --- dotenv & secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Editor / OS noise ---
+.DS_Store
+.idea/
+.vscode/
+
+# --- RIP-specific ---
+# Skip audit artefacts written to /tmp
+/tmp/rip-security-audit-*
+# Skip local config you may generate interactively
+.rip.conf
+.claude/
+/.gemini/
+
+# Added by cargo
+/target/
+
+# Project folders
+DONE/
+TODO/
+
+# Testing
+tests/
+test.js
+*.test.js
+*.spec.js
+*.snap
+
+# Rust backup files
+*.rs.bk

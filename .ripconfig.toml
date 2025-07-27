@@ -1,0 +1,7 @@
+repository_path = "."
+env_filename = ".env"
+env_keys = ["API_KEY", "DATABASE_URL", "STRIPE_SECRET_KEY", "JWT_SECRET", "GITHUB_TOKEN", "AWS_SECRET_ACCESS_KEY"]
+file_extensions = ["js", "ts", "jsx", "tsx", "py", "rb", "php", "java", "go", "rs", "cpp", "c", "cs"]
+ignore_patterns = ["node_modules", ".git", "target", "dist", "build", ".next", "coverage", ".nyc_output", "logs", "*.log", ".DS_Store", "Thumbs.db"]
+enable_web_scan = false
+web_url = ""

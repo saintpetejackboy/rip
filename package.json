@@ -1,6 +1,6 @@
 {
   "name": "rip-rip",
-  "version": "0.3.0-alpha.7",
+  "version": "0.3.0-alpha.8",
   "description": "Rest In Peace, Vulnerabilities - A terminal-based security auditing tool",
   "bin": {
     "rip-rip": "rip.js"

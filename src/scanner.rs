@@ -208,6 +208,11 @@ fn get_common_secret_patterns() -> (Vec<String>, Vec<String>) {
 }
 
 fn scan_file_for_pattern(file_path: &Path, pattern: &str, env_key: &str) -> Result<Vec<ScanMatch>> {
+    // Skip scanning the .env file itself to avoid self-references
+    if file_path.file_name().and_then(|n| n.to_str()) == Some(".env") {
+        return Ok(Vec::new());
+    }
+    
     let matcher = RegexMatcher::new_line_matcher(&regex::escape(pattern))?;
     let mut searcher = SearcherBuilder::new().line_number(true).build();
     let mut matches = Vec::new();
@@ -215,39 +220,7 @@ fn scan_file_for_pattern(file_path: &Path, pattern: &str, env_key: &str) -> Resu
     let mut sink = ScanSink::new(file_path, env_key, &mut matches);
     searcher.search_path(&matcher, file_path, &mut sink)?;
 
-    // Filter out false positives (comments, variable names, test data)
-    let filtered_matches: Vec<ScanMatch> = matches
-        .into_iter()
-        .filter(|m| !is_false_positive(&m.line_content, pattern))
-        .collect();
-
-    Ok(filtered_matches)
-}
-
-fn is_false_positive(line_content: &str, pattern: &str) -> bool {
-    let line = line_content.trim();
-    
-    // Skip comments
-    if line.starts_with("//") || line.starts_with("#") || line.contains("// ") {
-        return true;
-    }
-    
-    // Skip string literals that are just defining the pattern
-    if line.contains(&format!("\"{pattern}\"")) || line.contains(&format!("'{pattern}'")) {
-        return true;
-    }
-    
-    // Skip .to_string() definitions
-    if line.contains(".to_string()") && line.contains(&format!("\"{pattern}\"")) {
-        return true;
-    }
-    
-    // Skip test assertions and mock data
-    if line.contains("assert") || line.contains("test") || line.contains("mock") || line.contains("example") {
-        return true;
-    }
-    
-    false
+    Ok(matches)
 }
 
 struct ScanSink<'a> {

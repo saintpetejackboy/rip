@@ -293,14 +293,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎯 Roadmap
 
+- [ ] **NPM publishing** for easy `npx rip` installation
+- [ ] **JSON output format** for CI/CD integration
 - [ ] **Enhanced secret detection** with entropy analysis
+- [ ] **Better error handling** and user experience
 - [ ] **Git history scanning** for committed secrets
-- [ ] **JSON/SARIF output** formats for tool integration
 - [ ] **Docker image** for containerized scanning
-- [ ] **VS Code extension** with real-time detection
-- [ ] **CI/CD plugins** for major platforms
 
-See [TODO/NEXT-STEPS.md](TODO/NEXT-STEPS.md) for detailed roadmap.
+See [TODO/WORK.md](TODO/WORK.md) for detailed work items and production readiness checklist.
 
 ---
 

@@ -63,9 +63,9 @@
 - `rip version`: Version display
 
 ## 📦 NPM Package Ready
-- **Package name**: `rip` (secured on npm)
+- **Package name**: `rip-rip` (published on npm)
 - **Binary wrapper**: rip.js for cross-platform support
-- **Installation**: Ready for `npx rip` usage
+- **Installation**: Ready for `npx rip-rip` usage
 - **Dependencies**: All configured and building successfully
 
 ## 🔧 Build & Quality

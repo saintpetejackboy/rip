@@ -96,9 +96,9 @@ package.json + rip.js wrapper:
 
 postinstall detects OS/arch, downloads correct binary from GH Releases
 
-bin entry links npx rip to the wrapper
+bin entry links npx rip-rip to the wrapper
 
-Publish to npm registry so users run the tool via npx rip
+Publish to npm registry so users run the tool via npx rip-rip
 
 🧪 Optional Additional Checks
 Use secretscan crate, open source secret detection for generic pattern + entropy-based scanning (parallel via Rayon, respects .gitignore) 

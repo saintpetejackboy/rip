@@ -192,7 +192,7 @@ async function install() {
     }
     
     console.log('✅ RIP vulnerability scanner installed successfully!');
-    console.log('🚀 Run with: npx rip');
+    console.log('🚀 Run with: npx rip-rip');
     
   } catch (error) {
     console.error('❌ Installation failed:', error.message);

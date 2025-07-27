@@ -35,7 +35,7 @@ rip/
 ## NPM Package Name
 - ✅ Secured the `rip` package name for npm/npx usage
 - ✅ Updated package.json to use simple "rip" name
-- ✅ Users will be able to run `npx rip` once published
+- ✅ Users will be able to run `npx rip-rip` once published
 
 ## Dependencies Added
 - clap 4.5 (CLI parsing)

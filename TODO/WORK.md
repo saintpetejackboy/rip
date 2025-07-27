@@ -7,7 +7,7 @@
 - [x] Create postinstall.js script for binary download from GitHub Releases
 - [ ] Test npm package locally before publishing
 - [ ] Publish to npm registry with `npm publish`
-- [ ] Verify `npx rip` works globally
+- [ ] Verify `npx rip-rip` works globally
 
 ### Final Code Quality
 - [x] Run final `cargo clippy` check and fix any remaining warnings (ZERO warnings)
@@ -96,7 +96,7 @@
 
 ## 📊 Success Metrics for v1.0
 
-- Successfully installable via `npx rip` on all major platforms
+- Successfully installable via `npx rip-rip` on all major platforms
 - Scans typical development repositories in under 30 seconds
 - Detects common secrets with minimal false positives
 - Clear, actionable output that developers can understand

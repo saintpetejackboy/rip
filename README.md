@@ -36,10 +36,10 @@
 ### Install & Run (NPX - Recommended)
 ```bash
 # Run immediately without installation
-npx rip
+npx rip-rip
 
 # Or install globally
-npm install -g rip
+npm install -g rip-rip
 rip --help
 ```
 
@@ -320,14 +320,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Run RIP Security Scan
-        run: npx rip --auto scan
+        run: npx rip-rip --auto scan
 ```
 
 ### GitLab CI
 ```yaml
 security_scan:
   script:
-    - npx rip --auto scan
+    - npx rip-rip --auto scan
   only:
     - merge_requests
     - master
@@ -417,7 +417,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎯 Roadmap
 
-- [ ] **NPM publishing** for easy `npx rip` installation
+- [ ] **NPM publishing** for easy `npx rip-rip` installation
 - [ ] **JSON output format** for CI/CD integration
 - [ ] **Enhanced secret detection** with entropy analysis
 - [ ] **Better error handling** and user experience

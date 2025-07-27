@@ -51,7 +51,7 @@
 
 ### Distribution Channels
 1. **Cargo**: `cargo install rip` (Rust ecosystem)
-2. **NPM**: `npx rip` (Node.js ecosystem with binary download)
+2. **NPM**: `npx rip-rip` (Node.js ecosystem with binary download)
 3. **GitHub Releases**: Direct binary downloads
 
 ### Platform Support

@@ -1,7 +1,7 @@
 use crate::config::Config;
 use anyhow::Result;
 use colored::Colorize;
-use dialoguer::{Confirm, Input, MultiSelect, Select};
+use dialoguer::{Confirm, Input, MultiSelect};
 use std::path::PathBuf;
 
 pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
@@ -25,57 +25,63 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
     // 3. Parse .env file and select keys
     println!("\nParsing environment file...");
     let available_keys = config.parse_env_file()?;
-    
+
     if available_keys.is_empty() {
         println!("No environment variables found or all values are trivial");
         println!("Continuing with empty key list...");
     } else {
-        println!("Found {} environment variables with non-trivial values:", available_keys.len());
-        
+        println!(
+            "Found {} environment variables with non-trivial values:",
+            available_keys.len()
+        );
+
         let selected_indices = MultiSelect::new()
             .with_prompt("Select environment keys to scan for")
             .items(&available_keys)
             .defaults(&vec![true; available_keys.len()]) // Select all by default
             .interact()?;
-        
-        config.env_keys = selected_indices.iter()
+
+        config.env_keys = selected_indices
+            .iter()
             .map(|&i| available_keys[i].clone())
             .collect();
-        
+
         println!("Selected {} keys for scanning", config.env_keys.len());
     }
 
     // 4. File extensions
     println!("\nConfiguring file extensions to scan...");
     let extension_defaults = vec![
-        true, true, true, true,  // js, ts, jsx, tsx
-        true, true, true, true,  // py, rb, php, java  
-        true, true, true, true,  // go, rs, cpp, c
+        true, true, true, true, // js, ts, jsx, tsx
+        true, true, true, true, // py, rb, php, java
+        true, true, true, true, // go, rs, cpp, c
         true, false, false, false, // cs, yaml, yml, json
-        false, false, false      // xml, md, txt
+        false, false, false, // xml, md, txt
     ];
-    
+
     let selected_ext_indices = MultiSelect::new()
         .with_prompt("Select file extensions to include in scan")
         .items(&config.file_extensions)
         .defaults(&extension_defaults)
         .interact()?;
-    
-    config.file_extensions = selected_ext_indices.iter()
+
+    config.file_extensions = selected_ext_indices
+        .iter()
         .map(|&i| config.file_extensions[i].clone())
         .collect();
 
     // 5. Ignore patterns
     println!("\nConfiguring directories/patterns to ignore...");
     let ignore_defaults = vec![true; config.ignore_patterns.len()]; // All ignored by default
-    
+
     let selected_ignore_indices = MultiSelect::new()
         .with_prompt("Select patterns to ignore during scan")
         .items(&config.ignore_patterns)
         .defaults(&ignore_defaults)
         .interact()?;
-    
-    config.ignore_patterns = selected_ignore_indices.iter()
+
+    config.ignore_patterns = selected_ignore_indices
+        .iter()
         .map(|&i| config.ignore_patterns[i].clone())
         .collect();
 
@@ -91,7 +97,7 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
             .with_prompt("Public URL for web scanning")
             .allow_empty(true)
             .interact()?;
-        
+
         if !web_url.is_empty() {
             config.web_url = Some(web_url);
         }
@@ -100,7 +106,7 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
     // 7. Save configuration
     println!("\nConfiguration complete!");
     print_config_summary(&config);
-    
+
     let save_config = Confirm::new()
         .with_prompt("Save this configuration to .ripconfig.toml?")
         .default(true)
@@ -121,8 +127,15 @@ fn print_config_summary(config: &Config) {
     println!("  Selected keys: {} items", config.env_keys.len());
     println!("  File extensions: {} types", config.file_extensions.len());
     println!("  Ignore patterns: {} items", config.ignore_patterns.len());
-    println!("  Web scanning: {}", if config.enable_web_scan { "enabled" } else { "disabled" });
-    
+    println!(
+        "  Web scanning: {}",
+        if config.enable_web_scan {
+            "enabled"
+        } else {
+            "disabled"
+        }
+    );
+
     if let Some(url) = &config.web_url {
         println!("  Web URL: {}", url);
     }

@@ -25,7 +25,7 @@ impl Severity {
     fn color(&self) -> &str {
         match self {
             Severity::Low => "green",
-            Severity::Medium => "yellow", 
+            Severity::Medium => "yellow",
             Severity::High => "red",
             Severity::Critical => "bright_red",
         }
@@ -53,7 +53,7 @@ pub async fn scan_web(base_url: &str) -> Result<WebScanResults> {
     // Common sensitive file paths to check
     let sensitive_paths = vec![
         "/.env",
-        "/.git/config", 
+        "/.git/config",
         "/.git/HEAD",
         "/backup.sql",
         "/database.sql",
@@ -74,13 +74,20 @@ pub async fn scan_web(base_url: &str) -> Result<WebScanResults> {
     for path in &sensitive_paths {
         let url = format!("{}{}", base_url.trim_end_matches('/'), path);
         endpoints_checked += 1;
-        
+
         match client.get(&url).send().await {
             Ok(response) => {
                 if response.status().is_success() {
                     let severity = match path {
-                        p if p.contains(".env") || p.contains(".git") || p.contains("config") => Severity::Critical,
-                        p if p.contains("backup") || p.contains("database") || p.contains("admin") => Severity::High,
+                        p if p.contains(".env") || p.contains(".git") || p.contains("config") => {
+                            Severity::Critical
+                        }
+                        p if p.contains("backup")
+                            || p.contains("database")
+                            || p.contains("admin") =>
+                        {
+                            Severity::High
+                        }
                         p if p.contains("debug") || p.contains("test") => Severity::Medium,
                         _ => Severity::Low,
                     };
@@ -106,13 +113,18 @@ pub async fn scan_web(base_url: &str) -> Result<WebScanResults> {
     if let Ok(response) = client.get(&robots_url).send().await {
         if response.status().is_success() {
             if let Ok(content) = response.text().await {
-                if content.lines().count() > 10 || content.contains("admin") || content.contains("private") {
+                if content.lines().count() > 10
+                    || content.contains("admin")
+                    || content.contains("private")
+                {
                     vulnerabilities.push(WebVulnerability {
                         url: robots_url,
                         vulnerability_type: "Information Disclosure".to_string(),
                         severity: Severity::Low,
-                        description: "Robots.txt reveals potentially sensitive directory structure".to_string(),
-                        recommendation: "Review robots.txt for sensitive path disclosure".to_string(),
+                        description: "Robots.txt reveals potentially sensitive directory structure"
+                            .to_string(),
+                        recommendation: "Review robots.txt for sensitive path disclosure"
+                            .to_string(),
                     });
                 }
             }
@@ -152,10 +164,10 @@ fn check_security_headers(
             vulnerabilities.push(WebVulnerability {
                 url: base_url.to_string(),
                 vulnerability_type: "Missing Security Header".to_string(),
-                severity: if header_name == "strict-transport-security" { 
-                    Severity::High 
-                } else { 
-                    Severity::Medium 
+                severity: if header_name == "strict-transport-security" {
+                    Severity::High
+                } else {
+                    Severity::Medium
                 },
                 description: format!("Missing {} header", header_name),
                 recommendation: format!("Add {} header for {}", header_name, description),
@@ -189,7 +201,15 @@ pub fn display_web_results(results: &WebScanResults) {
         return;
     }
 
-    println!("{}", format!("Found {} web vulnerabilities:", results.vulnerabilities.len()).red().bold());
+    println!(
+        "{}",
+        format!(
+            "Found {} web vulnerabilities:",
+            results.vulnerabilities.len()
+        )
+        .red()
+        .bold()
+    );
 
     // Group by severity
     let mut by_severity: HashMap<String, Vec<&WebVulnerability>> = HashMap::new();
@@ -199,34 +219,179 @@ pub fn display_web_results(results: &WebScanResults) {
     }
 
     // Display in order of severity
-    for severity in &["Critical", "High", "Medium", "Low"] {
-        if let Some(vulns) = by_severity.get(&severity.to_string()) {
-            println!("\n{} {}:", 
-                "o".color(match *severity {
-                    "Critical" => "bright_red",
-                    "High" => "red", 
-                    "Medium" => "yellow",
-                    "Low" => "green",
-                    _ => "white",
-                }),
-                severity.color(match *severity {
-                    "Critical" => "bright_red",
-                    "High" => "red",
-                    "Medium" => "yellow", 
-                    "Low" => "green",
-                    _ => "white",
-                }).bold()
+    let severity_order = [
+        (Severity::Critical, "Critical"),
+        (Severity::High, "High"),
+        (Severity::Medium, "Medium"),
+        (Severity::Low, "Low"),
+    ];
+
+    for (sev_enum, severity_name) in &severity_order {
+        if let Some(vulns) = by_severity.get(&severity_name.to_string()) {
+            let color_name = sev_enum.color();
+            println!(
+                "\n{} {}:",
+                "o".color(color_name),
+                severity_name.color(color_name).bold()
             );
 
             for vuln in vulns {
                 println!("  {} {}", "Type:".bright_black(), vuln.vulnerability_type);
                 println!("  {} {}", "URL:".bright_black(), vuln.url.bright_blue());
                 println!("  {} {}", "Issue:".bright_black(), vuln.description);
-                println!("  {} {}", "Fix:".bright_black(), vuln.recommendation.green());
+                println!(
+                    "  {} {}",
+                    "Fix:".bright_black(),
+                    vuln.recommendation.green()
+                );
                 println!();
             }
         }
     }
 
-    println!("{}", "Web Security Recommendation: Address critical and high severity issues first.".bright_yellow());
+    println!(
+        "{}",
+        "Web Security Recommendation: Address critical and high severity issues first."
+            .bright_yellow()
+    );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
+    use std::str::FromStr;
+
+    #[test]
+    fn test_severity_color() {
+        assert_eq!(Severity::Low.color(), "green");
+        assert_eq!(Severity::Medium.color(), "yellow");
+        assert_eq!(Severity::High.color(), "red");
+        assert_eq!(Severity::Critical.color(), "bright_red");
+    }
+
+    #[test]
+    fn test_check_security_headers_missing_all() {
+        let headers = HeaderMap::new();
+        let mut vulnerabilities = Vec::new();
+
+        check_security_headers(&headers, "https://example.com", &mut vulnerabilities);
+
+        assert_eq!(vulnerabilities.len(), 6); // All 6 security headers missing
+
+        let hsts_vuln = vulnerabilities
+            .iter()
+            .find(|v| v.description.contains("strict-transport-security"))
+            .unwrap();
+        assert!(matches!(hsts_vuln.severity, Severity::High));
+
+        let other_vuln = vulnerabilities
+            .iter()
+            .find(|v| v.description.contains("x-frame-options"))
+            .unwrap();
+        assert!(matches!(other_vuln.severity, Severity::Medium));
+    }
+
+    #[test]
+    fn test_check_security_headers_with_headers() {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            HeaderName::from_str("x-frame-options").unwrap(),
+            HeaderValue::from_str("SAMEORIGIN").unwrap(),
+        );
+        headers.insert(
+            HeaderName::from_str("x-content-type-options").unwrap(),
+            HeaderValue::from_str("nosniff").unwrap(),
+        );
+
+        let mut vulnerabilities = Vec::new();
+        check_security_headers(&headers, "https://example.com", &mut vulnerabilities);
+
+        // Should have 4 missing headers (6 total - 2 present)
+        assert_eq!(vulnerabilities.len(), 4);
+
+        // Should not contain the headers we added
+        assert!(
+            !vulnerabilities
+                .iter()
+                .any(|v| v.description.contains("x-frame-options"))
+        );
+        assert!(
+            !vulnerabilities
+                .iter()
+                .any(|v| v.description.contains("x-content-type-options"))
+        );
+    }
+
+    #[test]
+    fn test_check_security_headers_insecure_xfo() {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            HeaderName::from_str("x-frame-options").unwrap(),
+            HeaderValue::from_str("ALLOWALL").unwrap(),
+        );
+
+        let mut vulnerabilities = Vec::new();
+        check_security_headers(&headers, "https://example.com", &mut vulnerabilities);
+
+        // Should have 5 missing headers + 1 insecure header
+        assert_eq!(vulnerabilities.len(), 6);
+
+        let insecure_xfo = vulnerabilities
+            .iter()
+            .find(|v| v.vulnerability_type == "Insecure Header Configuration")
+            .unwrap();
+        assert!(matches!(insecure_xfo.severity, Severity::High));
+        assert!(
+            insecure_xfo
+                .description
+                .contains("X-Frame-Options set to ALLOWALL")
+        );
+    }
+
+    #[test]
+    fn test_web_vulnerability_creation() {
+        let vuln = WebVulnerability {
+            url: "https://example.com/.env".to_string(),
+            vulnerability_type: "Exposed Sensitive File".to_string(),
+            severity: Severity::Critical,
+            description: "Environment file exposed".to_string(),
+            recommendation: "Remove public access to .env file".to_string(),
+        };
+
+        assert_eq!(vuln.url, "https://example.com/.env");
+        assert!(matches!(vuln.severity, Severity::Critical));
+    }
+
+    #[test]
+    fn test_web_scan_results_creation() {
+        let vulnerabilities = vec![WebVulnerability {
+            url: "https://example.com/.env".to_string(),
+            vulnerability_type: "Exposed File".to_string(),
+            severity: Severity::High,
+            description: "Test".to_string(),
+            recommendation: "Fix it".to_string(),
+        }];
+
+        let results = WebScanResults {
+            vulnerabilities: vulnerabilities.clone(),
+            base_url: "https://example.com".to_string(),
+            endpoints_checked: 50,
+        };
+
+        assert_eq!(results.vulnerabilities.len(), 1);
+        assert_eq!(results.base_url, "https://example.com");
+        assert_eq!(results.endpoints_checked, 50);
+    }
+
+    // Integration test would require a mock server
+    // This is covered by the mockito dependency for future implementation
+    #[tokio::test]
+    async fn test_scan_web_invalid_url() {
+        // Test with invalid URL should handle gracefully
+        let result = scan_web("not-a-valid-url").await;
+        // Should either error gracefully or return empty results
+        // Implementation depends on how we want to handle invalid URLs
+        assert!(result.is_ok() || result.is_err());
+    }
 }

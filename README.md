@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![RIP Logo](art/rip-logo.txt)
-
 **A blazing-fast terminal-based security scanner that finds exposed secrets and vulnerabilities**
 
 [![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
@@ -27,7 +25,7 @@ rip --help
 ### Build from Source
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/rip.git
+git clone https://github.com/saintpetejackboy/rip
 cd rip
 
 # Build with Cargo
@@ -229,7 +227,7 @@ security_scan:
 ### Building
 ```bash
 # Clone repository
-git clone https://github.com/your-org/rip.git
+git clone https://github.com/saintpetejackboy/rip
 cd rip
 
 # Install dependencies and build
@@ -289,9 +287,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙋 Support
 
 - **Documentation**: Check the `md/` directory for detailed guides
-- **Issues**: Report bugs on [GitHub Issues](https://github.com/your-org/rip/issues)
-- **Security**: For security vulnerabilities, email security@yourorg.com
-- **Community**: Join discussions in [GitHub Discussions](https://github.com/your-org/rip/discussions)
+- **Issues**: Report bugs on [GitHub Issues](https://github.com/saintpetejackboy/rip/issues)
+- **Security**: For security vulnerabilities, email security@saintpetejackboy.com
+- **Community**: Join discussions in [GitHub Discussions](https://github.com/saintpetejackboy/rip/discussions)
 
 ## 🎯 Roadmap
 
@@ -310,6 +308,6 @@ See [TODO/NEXT-STEPS.md](TODO/NEXT-STEPS.md) for detailed roadmap.
 
 **Built with ❤️ by the security community**
 
-[⭐ Star on GitHub](https://github.com/your-org/rip) | [📦 View on NPM](https://www.npmjs.com/package/rip) | [📖 Read the Docs](md/)
+[⭐ Star on GitHub](https://github.com/saintpetejackboy/rip) | [📦 View on NPM](https://www.npmjs.com/package/rip) | [📖 Read the Docs](md/)
 
 </div>

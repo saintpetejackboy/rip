@@ -4,7 +4,7 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[command(name = "rip")]
 #[command(about = "Rest In Peace, Vulnerabilities - A terminal-based security auditing tool")]
-#[command(version = "0.1.0")]
+#[command(version = "0.2.0")]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,

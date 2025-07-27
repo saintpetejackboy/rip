@@ -137,10 +137,43 @@ async function install() {
     console.log(`📦 Downloading ${downloadName} for ${os.platform()}-${os.arch()}...`);
     
     // Get latest release
-    const release = await getLatestRelease();
+    let release;
+    try {
+      release = await getLatestRelease();
+    } catch (error) {
+      console.log('⚠️  No GitHub releases found. Attempting local build...');
+      
+      // Try to build locally if we have Rust installed
+      try {
+        const fs = require('fs');
+        if (fs.existsSync('Cargo.toml')) {
+          console.log('🔨 Building from source...');
+          execSync('cargo build --release', { stdio: 'inherit' });
+          
+          // Copy binary to expected location
+          const sourceBinary = `target/release/rip${os.platform() === 'win32' ? '.exe' : ''}`;
+          if (fs.existsSync(sourceBinary)) {
+            const destDir = path.join(__dirname, 'bin');
+            if (!fs.existsSync(destDir)) {
+              fs.mkdirSync(destDir, { recursive: true });
+            }
+            fs.copyFileSync(sourceBinary, binaryPath);
+            if (os.platform() !== 'win32') {
+              execSync(`chmod +x "${binaryPath}"`, { stdio: 'ignore' });
+            }
+            console.log('✅ Built and installed from source!');
+            return;
+          }
+        }
+      } catch (buildError) {
+        console.log('❌ Local build failed:', buildError.message);
+      }
+      
+      throw new Error('No releases available and local build failed. Please check the repository for manual installation instructions.');
+    }
     
     // Find the correct asset
-    const asset = release.assets.find(asset => asset.name === downloadName);
+    const asset = release.assets && release.assets.find(asset => asset.name === downloadName);
     
     if (!asset) {
       throw new Error(`Binary not found for platform ${os.platform()}-${os.arch()}`);

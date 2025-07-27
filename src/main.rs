@@ -68,7 +68,7 @@ async fn load_config(args: &cli::Cli) -> Result<Config> {
     let config_path = args
         .config
         .clone()
-        .unwrap_or_else(|| Config::default_config_path());
+        .unwrap_or_else(Config::default_config_path);
 
     // Force reconfiguration if requested
     if args.reconfigure {
@@ -129,9 +129,9 @@ async fn run_scan(config: &Config) -> Result<()> {
 fn display_logo() {
     // Try to load and display ASCII art
     if let Ok(logo) = fs::read_to_string("art/rip-logo.txt") {
-        println!("{}", logo);
+        println!("{logo}");
     } else if let Ok(skull_logo) = fs::read_to_string("art/rip-skull-logo.txt") {
-        println!("{}", skull_logo);
+        println!("{skull_logo}");
     } else {
         // Fallback ASCII art
         println!(

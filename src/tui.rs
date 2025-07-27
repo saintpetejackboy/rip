@@ -13,14 +13,14 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
 
     // 1. Repository directory
     let repo_path: String = Input::new()
-        .with_prompt(&format!("{} {}", "🎯".bright_yellow(), "Repository directory to scan".bright_cyan().bold()))
+        .with_prompt(format!("{} {}", "🎯".bright_yellow(), "Repository directory to scan".bright_cyan().bold()))
         .default(config.repository_path.to_string_lossy().to_string())
         .interact()?;
     config.repository_path = PathBuf::from(repo_path);
 
     // 2. Environment file name
     let env_file: String = Input::new()
-        .with_prompt(&format!("{} {}", "📄".bright_yellow(), "Environment file name".bright_cyan().bold()))
+        .with_prompt(format!("{} {}", "📄".bright_yellow(), "Environment file name".bright_cyan().bold()))
         .default(config.env_filename.clone())
         .interact()?;
     config.env_filename = env_file;
@@ -41,7 +41,7 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
         );
 
         let selected_indices = MultiSelect::new()
-            .with_prompt(&format!("{} {}", "🔑".bright_yellow(), "Select environment keys to scan for".bright_cyan().bold()))
+            .with_prompt(format!("{} {}", "🔑".bright_yellow(), "Select environment keys to scan for".bright_cyan().bold()))
             .items(&available_keys)
             .defaults(&vec![true; available_keys.len()]) // Select all by default
             .interact()?;
@@ -65,7 +65,7 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
     ];
 
     let selected_ext_indices = MultiSelect::new()
-        .with_prompt(&format!("{} {}", "🔧".bright_yellow(), "Select file extensions to include in scan".bright_cyan().bold()))
+        .with_prompt(format!("{} {}", "🔧".bright_yellow(), "Select file extensions to include in scan".bright_cyan().bold()))
         .items(&config.file_extensions)
         .defaults(&extension_defaults)
         .interact()?;
@@ -80,7 +80,7 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
     let ignore_defaults = vec![true; config.ignore_patterns.len()]; // All ignored by default
 
     let selected_ignore_indices = MultiSelect::new()
-        .with_prompt(&format!("{} {}", "⛔".bright_yellow(), "Select patterns to ignore during scan".bright_cyan().bold()))
+        .with_prompt(format!("{} {}", "⛔".bright_yellow(), "Select patterns to ignore during scan".bright_cyan().bold()))
         .items(&config.ignore_patterns)
         .defaults(&ignore_defaults)
         .interact()?;
@@ -93,13 +93,13 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
     // 6. Web scanning configuration
     println!("\n{} {}", "🌐".bright_yellow(), "Web scanning configuration...".bright_cyan().bold());
     config.enable_web_scan = Confirm::new()
-        .with_prompt(&format!("{} {}", "🔗".bright_yellow(), "Enable web vulnerability scanning?".bright_cyan().bold()))
+        .with_prompt(format!("{} {}", "🔗".bright_yellow(), "Enable web vulnerability scanning?".bright_cyan().bold()))
         .default(false)
         .interact()?;
 
     if config.enable_web_scan {
         let web_url: String = Input::new()
-            .with_prompt(&format!("{} {}", "🌍".bright_yellow(), "Public URL for web scanning".bright_cyan().bold()))
+            .with_prompt(format!("{} {}", "🌍".bright_yellow(), "Public URL for web scanning".bright_cyan().bold()))
             .allow_empty(true)
             .interact()?;
 
@@ -113,7 +113,7 @@ pub async fn run_interactive_setup(mut config: Config) -> Result<Config> {
     print_config_summary(&config);
 
     let save_config = Confirm::new()
-        .with_prompt(&format!("{} {}", "💾".bright_yellow(), "Save this configuration to .ripconfig.toml?".bright_cyan().bold()))
+        .with_prompt(format!("{} {}", "💾".bright_yellow(), "Save this configuration to .ripconfig.toml?".bright_cyan().bold()))
         .default(true)
         .interact()?;
 
@@ -154,7 +154,7 @@ fn display_skull_art() {
     
     // Try to load skull art from file
     if let Ok(skull_art) = fs::read_to_string("art/rip-skull-logo.txt") {
-        println!("{}", skull_art);
+        println!("{skull_art}");
     } else {
         // Fallback skull ASCII art with colors
         println!("{}", r#"

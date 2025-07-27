@@ -96,7 +96,7 @@ pub async fn scan_web(base_url: &str) -> Result<WebScanResults> {
                         url: url.clone(),
                         vulnerability_type: "Exposed Sensitive File".to_string(),
                         severity,
-                        description: format!("Sensitive file accessible at {}", path),
+                        description: format!("Sensitive file accessible at {path}"),
                         recommendation: "Remove or restrict access to this file".to_string(),
                     });
                 }
@@ -169,8 +169,8 @@ fn check_security_headers(
                 } else {
                     Severity::Medium
                 },
-                description: format!("Missing {} header", header_name),
-                recommendation: format!("Add {} header for {}", header_name, description),
+                description: format!("Missing {header_name} header"),
+                recommendation: format!("Add {header_name} header for {description}"),
             });
         }
     }
@@ -227,7 +227,7 @@ pub fn display_web_results(results: &WebScanResults) {
     ];
 
     for (sev_enum, severity_name) in &severity_order {
-        if let Some(vulns) = by_severity.get(&severity_name.to_string()) {
+        if let Some(vulns) = by_severity.get(&format!("{sev_enum:?}")) {
             let color_name = sev_enum.color();
             println!(
                 "\n{} {}:",

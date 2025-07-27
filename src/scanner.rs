@@ -151,8 +151,7 @@ fn should_ignore_path(path: &Path, ignore_patterns: &[String]) -> bool {
     for pattern in ignore_patterns {
         if pattern.contains('*') {
             // Simple glob matching
-            if pattern.starts_with("*.") {
-                let ext = &pattern[2..];
+            if let Some(ext) = pattern.strip_prefix("*.") {
                 if let Some(file_ext) = path.extension() {
                     if file_ext == ext {
                         return true;
@@ -218,7 +217,7 @@ impl<'a> Sink for ScanSink<'a> {
 
 fn create_log_file(matches: &[ScanMatch]) -> Result<PathBuf> {
     let timestamp = chrono::Utc::now().format("%Y%m%d_%H%M%S");
-    let log_path = PathBuf::from(format!("/tmp/rip-{}.log", timestamp));
+    let log_path = PathBuf::from(format!("/tmp/rip-{timestamp}.log"));
 
     let mut file = fs::File::create(&log_path)?;
 
@@ -321,7 +320,7 @@ pub fn display_results(results: &ScanResults) {
             if trimmed_content.len() > 100 {
                 println!("    {}...", &trimmed_content[..100]);
             } else {
-                println!("    {}", trimmed_content);
+                println!("    {trimmed_content}");
             }
         }
     }

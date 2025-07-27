@@ -44,7 +44,13 @@ async fn main() -> Result<()> {
             } else if show {
                 println!("{}", toml::to_string_pretty(&config)?);
             } else {
-                tui::run_interactive_setup(config).await?;
+                if atty::is(atty::Stream::Stdin) && atty::is(atty::Stream::Stdout) {
+                    tui::run_interactive_setup(config).await?;
+                } else {
+                    eprintln!("Interactive configuration requires a terminal.");
+                    eprintln!("Run this command in an interactive terminal or use --show to view current config.");
+                    return Ok(());
+                }
             }
         }
         Commands::Version => {
@@ -75,8 +81,12 @@ async fn load_config(args: &cli::Cli) -> Result<Config> {
         let config = Config::default();
         return if args.auto {
             Ok(config)
-        } else {
+        } else if atty::is(atty::Stream::Stdin) && atty::is(atty::Stream::Stdout) {
             tui::run_interactive_setup(config).await
+        } else {
+            eprintln!("Interactive configuration requires a terminal.");
+            eprintln!("Use --auto flag to run with default configuration.");
+            Ok(config)
         };
     }
 
@@ -93,8 +103,15 @@ async fn load_config(args: &cli::Cli) -> Result<Config> {
         // Auto mode with no config - use defaults
         Ok(Config::default())
     } else {
-        // No config and not auto mode - run interactive setup
-        tui::run_interactive_setup(Config::default()).await
+        // No config and not auto mode - check if we can run interactive setup
+        if atty::is(atty::Stream::Stdin) && atty::is(atty::Stream::Stdout) {
+            tui::run_interactive_setup(Config::default()).await
+        } else {
+            // Not an interactive terminal, use defaults and inform user
+            eprintln!("No configuration found and not running in interactive mode.");
+            eprintln!("Using default configuration. Run 'rip config' in an interactive terminal to configure.");
+            Ok(Config::default())
+        }
     }
 }
 

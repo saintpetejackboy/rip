@@ -34,18 +34,17 @@ pub fn scan_files(config: &Config) -> Result<ScanResults> {
 
     // Get environment values to search for
     let env_values = config.get_env_values()?;
-    if env_values.is_empty() {
-        return Ok(ScanResults {
-            matches: Vec::new(),
-            files_scanned: 0,
-            scan_duration: start_time.elapsed()?,
-            log_file_path: create_log_file(&Vec::new())?,
-        });
-    }
+    
+    // If no env values, scan for common secret patterns
+    let (search_patterns, search_keys) = if env_values.is_empty() {
+        get_common_secret_patterns()
+    } else {
+        (env_values, config.env_keys.clone())
+    };
 
     println!(
-        "Scanning for {} environment variable values...",
-        env_values.len()
+        "Scanning for {} secret patterns...",
+        search_patterns.len()
     );
 
     // Create progress bar
@@ -82,9 +81,9 @@ pub fn scan_files(config: &Config) -> Result<ScanResults> {
             file_path.file_name().unwrap_or_default().to_string_lossy()
         ));
 
-        // Scan for each environment value
-        for (env_key, env_value) in config.env_keys.iter().zip(env_values.iter()) {
-            if let Ok(matches) = scan_file_for_pattern(&file_path, env_value, env_key) {
+        // Scan for each pattern
+        for (env_key, pattern) in search_keys.iter().zip(search_patterns.iter()) {
+            if let Ok(matches) = scan_file_for_pattern(&file_path, pattern, env_key) {
                 all_matches.extend(matches);
             }
         }
@@ -165,6 +164,49 @@ fn should_ignore_path(path: &Path, ignore_patterns: &[String]) -> bool {
     false
 }
 
+fn get_common_secret_patterns() -> (Vec<String>, Vec<String>) {
+    let patterns = vec![
+        // Common API keys and tokens
+        "sk_live_".to_string(),
+        "sk_test_".to_string(),
+        "pk_live_".to_string(),
+        "pk_test_".to_string(),
+        "Bearer ".to_string(),
+        "ghp_".to_string(),        // GitHub personal access tokens
+        "gho_".to_string(),        // GitHub OAuth tokens
+        "ghu_".to_string(),        // GitHub user tokens
+        "ghs_".to_string(),        // GitHub server tokens
+        "ghr_".to_string(),        // GitHub refresh tokens
+        "xoxb-".to_string(),       // Slack bot tokens
+        "xoxp-".to_string(),       // Slack user tokens
+        "AKIA".to_string(),        // AWS access keys
+        "ASIA".to_string(),        // AWS temporary access keys
+        "ya29.".to_string(),       // Google OAuth tokens
+        "AIza".to_string(),        // Google API keys
+    ];
+    
+    let keys = vec![
+        "STRIPE_SECRET_KEY".to_string(),
+        "STRIPE_TEST_KEY".to_string(),
+        "STRIPE_PUBLIC_KEY".to_string(),
+        "STRIPE_TEST_PUBLIC_KEY".to_string(),
+        "BEARER_TOKEN".to_string(),
+        "GITHUB_TOKEN".to_string(),
+        "GITHUB_OAUTH_TOKEN".to_string(),
+        "GITHUB_USER_TOKEN".to_string(),
+        "GITHUB_SERVER_TOKEN".to_string(),
+        "GITHUB_REFRESH_TOKEN".to_string(),
+        "SLACK_BOT_TOKEN".to_string(),
+        "SLACK_USER_TOKEN".to_string(),
+        "AWS_ACCESS_KEY_ID".to_string(),
+        "AWS_TEMP_ACCESS_KEY_ID".to_string(),
+        "GOOGLE_OAUTH_TOKEN".to_string(),
+        "GOOGLE_API_KEY".to_string(),
+    ];
+    
+    (patterns, keys)
+}
+
 fn scan_file_for_pattern(file_path: &Path, pattern: &str, env_key: &str) -> Result<Vec<ScanMatch>> {
     let matcher = RegexMatcher::new_line_matcher(&regex::escape(pattern))?;
     let mut searcher = SearcherBuilder::new().line_number(true).build();
@@ -173,7 +215,39 @@ fn scan_file_for_pattern(file_path: &Path, pattern: &str, env_key: &str) -> Resu
     let mut sink = ScanSink::new(file_path, env_key, &mut matches);
     searcher.search_path(&matcher, file_path, &mut sink)?;
 
-    Ok(matches)
+    // Filter out false positives (comments, variable names, test data)
+    let filtered_matches: Vec<ScanMatch> = matches
+        .into_iter()
+        .filter(|m| !is_false_positive(&m.line_content, pattern))
+        .collect();
+
+    Ok(filtered_matches)
+}
+
+fn is_false_positive(line_content: &str, pattern: &str) -> bool {
+    let line = line_content.trim();
+    
+    // Skip comments
+    if line.starts_with("//") || line.starts_with("#") || line.contains("// ") {
+        return true;
+    }
+    
+    // Skip string literals that are just defining the pattern
+    if line.contains(&format!("\"{pattern}\"")) || line.contains(&format!("'{pattern}'")) {
+        return true;
+    }
+    
+    // Skip .to_string() definitions
+    if line.contains(".to_string()") && line.contains(&format!("\"{pattern}\"")) {
+        return true;
+    }
+    
+    // Skip test assertions and mock data
+    if line.contains("assert") || line.contains("test") || line.contains("mock") || line.contains("example") {
+        return true;
+    }
+    
+    false
 }
 
 struct ScanSink<'a> {

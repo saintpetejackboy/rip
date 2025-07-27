@@ -14,7 +14,7 @@ pub struct Cli {
     pub auto: bool,
 
     /// Path to configuration file
-    #[arg(long, value_name = "FILE")]
+    #[arg(long, value_name = "FILE", default_missing_value = ".ripconfig.toml", num_args = 0..=1)]
     pub config: Option<PathBuf>,
 
     /// Force reconfiguration, ignore existing config

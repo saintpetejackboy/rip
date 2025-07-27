@@ -109,6 +109,8 @@ rip --reconfigure scan
 --reconfigure    Force reconfiguration, ignore existing config
 --skip-config    Skip configuration loading/saving
 -v, --verbose    Enable verbose output
+-q, --quiet      Suppress all non-essential output
+-j, --json       Output results in JSON format
 -p, --path <PATH> Repository path to scan (default: current directory)
 -h, --help       Print help
 -V, --version    Print version
